@@ -13,6 +13,12 @@ import android.os.IBinder;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * MyService for in-class assignment 1
+ *
+ * @author James Bilbrey
+ * @author Katelyn Seitz
+ */
 public class MyService extends Service implements SensorEventListener {
 
 	MyBinder myBinder = new MyBinder();

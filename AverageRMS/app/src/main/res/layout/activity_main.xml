@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    /**
+    * activity_main for in-class assignment 1
+    *
+    * @author James Bilbrey
+    * @author Katelyn Seitz
+    */
+-->
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"

@@ -12,6 +12,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+/**
+ * MainActivity for in-class assignment 1
+ *
+ * @author James Bilbrey
+ * @author Katelyn Seitz
+ */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
 	private MyService myService;
