@@ -88,9 +88,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
-                android:text="Longitude"
+                android:text="GPS || NETWORK"
                 android:ems="10"
-                android:id="@+id/method"
+                android:id="@+id/provider"
                 android:layout_weight="1" />
         </LinearLayout>
 
