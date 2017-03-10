@@ -76,6 +76,7 @@ public class Method2Logic implements SensorEventListener {
 			So here I need to change the orientation of the phone so that acceleration will
 			be applied in the correct directions
 			 */
+			main.updateDistance();
 		}
 	}
 
@@ -100,6 +101,8 @@ public class Method2Logic implements SensorEventListener {
 			hasCompass = true;
 
 			main.sensorManager.unregisterListener(container, main.compass);
+
+			main.updateDistance();
 		}
 	}
 
