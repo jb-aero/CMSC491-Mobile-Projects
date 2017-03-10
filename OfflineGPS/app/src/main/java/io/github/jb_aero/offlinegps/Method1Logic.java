@@ -39,6 +39,8 @@ public class Method1Logic implements LocationListener {
 			_lat1.setText(String.format(Locale.US, "%f", lat1));
 			_long1.setText(String.format(Locale.US, "%f", long1));
 			_provider.setText(main.lastBestLoc.getProvider());
+
+			main.updateDistance();
 		}
 	}
 
