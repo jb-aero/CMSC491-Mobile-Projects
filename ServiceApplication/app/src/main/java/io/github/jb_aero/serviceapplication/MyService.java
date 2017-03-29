@@ -11,17 +11,16 @@ import android.os.IBinder;
 public class MyService extends Service implements SensorEventListener {
 
     MyBinder binder;
-    double cgx, cgy, cgz, // current values (t)
-            lgx, lgy, lgz; // last values (t - 1)
+    double gx, gy, gz;
 
     public MyService() {
         binder = new MyBinder();
-        lgx = lgy = lgz = 0;
+        gx = gy = gz = 0;
     }
 
     public double pollGravity() {
 
-        return Math.sqrt((cgx * cgx) + (cgy * cgy) + (cgz * cgz));
+        return Math.sqrt((gx * gx) + (gy * gy) + (gz * gz));
     }
 
     @Override
@@ -31,9 +30,9 @@ public class MyService extends Service implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        cgx = (0.9 * lgx) + (0.1 * event.values[0]);
-        cgy = (0.9 * lgy) + (0.1 * event.values[1]);
-        cgz = (0.9 * lgz) + (0.1 * event.values[2]);
+        gx = (0.9 * gx) + (0.1 * event.values[0]);
+        gy = (0.9 * gy) + (0.1 * event.values[1]);
+        gz = (0.9 * gz) + (0.1 * event.values[2]);
     }
 
     @Override
