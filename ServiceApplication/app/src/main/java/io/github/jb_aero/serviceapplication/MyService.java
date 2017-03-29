@@ -6,7 +6,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 
 public class MyService extends Service implements SensorEventListener {
@@ -18,6 +17,11 @@ public class MyService extends Service implements SensorEventListener {
     public MyService() {
         binder = new MyBinder();
         lgx = lgy = lgz = 0;
+    }
+
+    public double pollGravity() {
+
+        return Math.sqrt((cgx * cgx) + (cgy * cgy) + (cgz * cgz));
     }
 
     @Override
@@ -41,11 +45,6 @@ public class MyService extends Service implements SensorEventListener {
     {
         public MyService getService() {
             return MyService.this;
-        }
-
-        public double pollGravity() {
-
-            return Math.sqrt((cgx * cgx) + (cgy * cgy) + (cgz * cgz));
         }
     }
 }
