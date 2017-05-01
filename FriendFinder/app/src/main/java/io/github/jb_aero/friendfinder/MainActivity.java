@@ -1,8 +1,11 @@
 package io.github.jb_aero.friendfinder;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -12,97 +15,35 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
+	Button php, map;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		String latitude = "49.5";
-		String longitude = "-72.5";
-		String id = "tom";
+		php = (Button) findViewById(R.id.phpbutton);
+		map = (Button) findViewById(R.id.mapbutton);
 
-		String[] input = new String[4];
-		input[0] = latitude;
-		input[1] = longitude;
-		input[2] = id;
-
-		InvokeWebservice mywebservice = new InvokeWebservice();
-		mywebservice.execute(input);
-
-
+		php.setOnClickListener(this);
+		map.setOnClickListener(this);
 	}
 
-	private class InvokeWebservice extends AsyncTask<String,Integer,String> {
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-		}
+	@Override
+	public void onClick(View v) {
 
-		@Override
-		protected void onPostExecute(String s) {
-			super.onPostExecute(s);
-		}
-
-		@Override
-		protected void onProgressUpdate(Integer... values) {
-			super.onProgressUpdate(values);
-		}
-
-		@Override
-		protected String doInBackground(String... params) {
-
-			URL url;
-			String response = "";
-			String requestURL = "https://REDACTED/uploaddata.php";
-			try
-			{
-				url = new URL(requestURL);
-				HttpURLConnection myconnection =  (HttpURLConnection) url.openConnection();
-				myconnection.setReadTimeout(15000);
-				myconnection.setConnectTimeout(15000);
-				myconnection.setRequestMethod("POST");
-				myconnection.setDoInput(true);
-				myconnection.setDoOutput(true);
-
-				OutputStream os =  myconnection.getOutputStream();
-				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
-				StringBuilder str = new StringBuilder();
-
-				str.append("latitude="+params[0]+"&").append("longitude="+params[1]+"&");
-				str.append("id="+params[3]);
-
-				String urstr = str.toString();
-
-				writer.write(urstr);
-				writer.flush();
-				writer.close();
-
-				int responseCode = myconnection.getResponseCode();
-
-				if(responseCode == HttpURLConnection.HTTP_OK)
-				{
-					String line;
-					BufferedReader br = new BufferedReader(new InputStreamReader(
-							myconnection.getInputStream()));
-
-					line = br.readLine();
-					while(line != null)
-					{
-						response += line;
-						line = br.readLine();
-					}
-					br.close();
-				}
-				myconnection.disconnect();
-
-			}catch(Exception e)
-			{
-				e.printStackTrace();
-			}
-
-			return null;
+		Intent intent;
+		switch (v.getId())
+		{
+			case R.id.phpbutton:
+				intent = new Intent(this, LoginActivity.class);
+				startActivity(intent);
+				break;
+			case R.id.mapbutton:
+				intent = new Intent(this, MapsActivity.class);
+				startActivity(intent);
+				break;
 		}
 	}
 }
