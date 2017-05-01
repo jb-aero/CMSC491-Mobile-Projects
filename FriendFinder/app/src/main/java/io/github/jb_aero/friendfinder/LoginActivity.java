@@ -18,13 +18,14 @@ import java.net.URL;
 public class LoginActivity extends AppCompatActivity {
 
 	Handler handler = new Handler();
-	TextView retext;
+	TextView retext, urltext;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
 
-		retext = (TextView) findViewById(R.id.textView);
+		urltext = (TextView) findViewById(R.id.urltext);
+		retext = (TextView) findViewById(R.id.response);
 
 		String latitude = "49.5";
 		String longitude = "-72.5";
@@ -67,7 +68,12 @@ public class LoginActivity extends AppCompatActivity {
 			URL url;
 			int responseCode = -1337;
 			String response = "";
-			String requestURL = "https://REDACTED/uploaddata.php";
+
+			StringBuilder str = new StringBuilder("http://192.168.1.151/uploaddata.php");
+			str.append("?id="+params[2]);
+			str.append("&latitude="+params[0]).append("&longitude="+params[1]);
+			final String requestURL = str.toString();
+
 			try
 			{
 				url = new URL(requestURL);
@@ -78,25 +84,12 @@ public class LoginActivity extends AppCompatActivity {
 				myconnection.setDoInput(true);
 				myconnection.setDoOutput(true);
 
-				OutputStream os =  myconnection.getOutputStream();
-				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
-				StringBuilder str = new StringBuilder(requestURL);
-
-				str.append("?id="+params[2]);
-				str.append("&latitude="+params[0]).append("&longitude="+params[1]);
-
-				final String urstr = str.toString();
-
 				handler.post(new Runnable() {
 					@Override
 					public void run() {
-						retext.setText("URL: " + urstr);
+						urltext.setText("URL: " + requestURL);
 					}
 				});
-
-				writer.write(urstr);
-				writer.flush();
-				writer.close();
 
 				responseCode = myconnection.getResponseCode();
 

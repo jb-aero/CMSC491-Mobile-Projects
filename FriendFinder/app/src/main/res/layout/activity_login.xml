@@ -12,11 +12,21 @@
     tools:context="io.github.jb_aero.friendfinder.LoginActivity">
 
     <TextView
-        android:text="TextView"
+        android:id="@+id/response"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:id="@+id/textView"/>
+        android:layout_below="@+id/urltext"
+        android:layout_marginTop="37dp"
+        android:text="TextView"/>
+
+    <TextView
+        android:id="@+id/urltext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
 </RelativeLayout>
