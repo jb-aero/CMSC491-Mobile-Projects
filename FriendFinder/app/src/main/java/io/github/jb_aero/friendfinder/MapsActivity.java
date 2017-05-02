@@ -1,15 +1,16 @@
 package io.github.jb_aero.friendfinder;
 
+import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -19,20 +20,21 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import org.json.JSONArray;
+import org.json.JSONException;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
+public class MapsActivity extends FragmentActivity
+		implements OnMapReadyCallback, LocationListener, View.OnClickListener {
 
 	private GoogleMap mMap;
 	LocationManager locationManager;
 	boolean ready;
 	String[] input;
-	LocationUpdater updater;
+	InvokeWebservice updater;
 	TextView debug;
+	Button spoof;
 	Handler handler;
+	SupportMapFragment mapFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,130 +45,95 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 		input = new String[4];
 		int id = 1337;
-		input[0] = String.valueOf(id);
-		updater = new LocationUpdater();
+		input[0] = "?id=" + id;
 		debug = (TextView) findViewById(R.id.debugtext);
+		spoof = (Button) findViewById(R.id.spoof);
+		spoof.setOnClickListener(this);
 		handler = new Handler();
 
 		// Obtain the SupportMapFragment and get notified when the map is ready to be used.
-		SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.map);
-		mapFragment.getMapAsync(this);
+		mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-				&& ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-			ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1337);
+		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+				&& ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 1337);
 			return;
 		}
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000 * 30, 0, this);
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000 * 10, 0, this);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000 * 10, 0, this);
+		mapFragment.getMapAsync(this);
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-				&& ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-			ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1337);
+		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+				&& ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 1337);
 			return;
 		}
 		locationManager.removeUpdates(this);
+		ready = false;
 	}
 
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+			case R.id.spoof:
+				onLocationChanged(LocationSpoof.spoof());
+				break;
+		}
+	}
 
 	@Override
 	public void onMapReady(GoogleMap googleMap) {
 		mMap = googleMap;
+		mMap.setBuildingsEnabled(true);
+		mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 		ready = true;
 	}
 
 	@Override
 	public void onLocationChanged(Location location) {
 
-		input[1] = String.valueOf(location.getLatitude());
-		input[2] = String.valueOf(location.getLongitude());
-		updater.execute(input);
+		try {
+			if (FFUtility.isBetterAndUpdate(location)) {
 
-		if (ready) {
-			LatLng me = new LatLng(location.getLatitude(), location.getLongitude());
-			mMap.addMarker(new MarkerOptions().position(me).title("My Location"));
-			mMap.moveCamera(CameraUpdateFactory.newLatLng(me));
-			mMap.animateCamera(CameraUpdateFactory.zoomTo(20), 2000, null);
+				updater = new InvokeWebservice("uploaddata", handler, new MapsStringRunnable());
+				input[1] = "&latitude=" + location.getLatitude();
+				input[2] = "&longitude=" + location.getLongitude();
+				updater.execute(input);
+
+				if (ready) {
+					LatLng me = new LatLng(location.getLatitude(), location.getLongitude());
+					mMap.addMarker(new MarkerOptions().position(me).title("My Location"));
+					mMap.moveCamera(CameraUpdateFactory.newLatLng(me));
+					mMap.animateCamera(CameraUpdateFactory.zoomTo(15f), 2000, null);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
-	private class LocationUpdater extends AsyncTask<String,Integer,String> {
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-		}
+	private class MapsStringRunnable extends StringRunnable {
 
 		@Override
-		protected void onPostExecute(final String s) {
-			super.onPostExecute(s);
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					debug.setText(s);
+		public void run() {
+			StringBuilder objs = new StringBuilder();
+			try {
+				JSONArray json = new JSONArray(theString);
+				for (int i = 0; i < json.length(); i++) {
+					objs.append("|" + json.getJSONArray(i) + "|");
 				}
-			});
-		}
-
-		@Override
-		protected void onProgressUpdate(Integer... values) {
-			super.onProgressUpdate(values);
-		}
-
-		@Override
-		protected String doInBackground(String... params) {
-
-			URL url;
-			int responseCode = -1337;
-			String response = "";
-
-			StringBuilder str = new StringBuilder("http://192.168.1.151/uploaddata.php");
-			str.append("?id="+params[0]);
-			str.append("&latitude="+params[1]).append("&longitude="+params[2]);
-			final String requestURL = str.toString();
-
-			try
-			{
-				url = new URL(requestURL);
-				HttpURLConnection myconnection =  (HttpURLConnection) url.openConnection();
-				myconnection.setReadTimeout(15000);
-				myconnection.setConnectTimeout(15000);
-				myconnection.setRequestMethod("GET");
-				myconnection.setDoInput(true);
-				myconnection.setDoOutput(true);
-
-				responseCode = myconnection.getResponseCode();
-
-				if(responseCode == HttpURLConnection.HTTP_OK)
-				{
-					String line;
-					BufferedReader br = new BufferedReader(new InputStreamReader(
-							myconnection.getInputStream()));
-
-					line = br.readLine();
-					while(line != null)
-					{
-						response += line;
-						line = br.readLine();
-					}
-					br.close();
-				}
-				myconnection.disconnect();
-				Log.d("HEYLOOK", response);
-
-			}catch(Exception e)
-			{
+			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-
-			return responseCode + ": " + response;
+			debug.setText(theString + "\n" + objs.toString());
 		}
 	}
 
