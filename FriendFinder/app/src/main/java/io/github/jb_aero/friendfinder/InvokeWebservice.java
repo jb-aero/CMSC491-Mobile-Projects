@@ -48,7 +48,7 @@ public class InvokeWebservice extends AsyncTask<String,Integer,String> {
 		int responseCode = -1337;
 		String response = "";
 
-		StringBuilder str = new StringBuilder("http://REDACTED/" + phpfile + ".php");
+		StringBuilder str = new StringBuilder("http://INSERTHOSTHERE/" + phpfile + ".php");
 		for (String s : params) {
 			str.append(s);
 		}

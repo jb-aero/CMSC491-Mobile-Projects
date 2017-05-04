@@ -17,6 +17,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -45,8 +47,8 @@ public class MapsActivity extends FragmentActivity
 		ready = false;
 		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 		input = new String[4];
-		int id = 1337;
-		input[0] = "?id=" + id;
+		input[0] = "?id=" + getIntent().getStringExtra("id");
+		input[3] = "&username=" + getIntent().getStringExtra("username");
 		debug = (TextView) findViewById(R.id.debugtext);
 		spoof = (Button) findViewById(R.id.spoof);
 		spoof.setOnClickListener(this);
@@ -65,8 +67,8 @@ public class MapsActivity extends FragmentActivity
 			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 1337);
 			return;
 		}
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000 * 10, 0, this);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000 * 10, 0, this);
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
 		mapFragment.getMapAsync(this);
 	}
 
@@ -95,7 +97,7 @@ public class MapsActivity extends FragmentActivity
 	public void onMapReady(GoogleMap googleMap) {
 		mMap = googleMap;
 		mMap.setBuildingsEnabled(true);
-		mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+		mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 		ready = true;
 	}
 
@@ -109,13 +111,6 @@ public class MapsActivity extends FragmentActivity
 				input[1] = "&latitude=" + location.getLatitude();
 				input[2] = "&longitude=" + location.getLongitude();
 				updater.execute(input);
-
-				if (ready) {
-					LatLng me = new LatLng(location.getLatitude(), location.getLongitude());
-					mMap.addMarker(new MarkerOptions().position(me).title("My Location"));
-					mMap.moveCamera(CameraUpdateFactory.newLatLng(me));
-					mMap.animateCamera(CameraUpdateFactory.zoomTo(15f), 2000, null);
-				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -126,16 +121,28 @@ public class MapsActivity extends FragmentActivity
 
 		@Override
 		public void run() {
-			StringBuilder objs = new StringBuilder();
+			if (!ready)
+				return;
+			mMap.clear();
 			try {
 				JSONArray json = new JSONArray(theString);
-				for (int i = 0; i < json.length(); i++) {
-					objs.append("|" + json.getJSONArray(i) + "|");
+				for (int i = 0; i < json.length(); i++)
+				{
+					JSONArray item = new JSONArray(json.getString(i));
+					boolean self = getIntent().getStringExtra("username").equals(item.getString(0));
+					BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(self ? BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_AZURE);
+					String title = item.getString(0) + " @ " + item.getString(1);
+					LatLng mloc = new LatLng(item.getDouble(2), item.getDouble(3));
+					mMap.addMarker(new MarkerOptions().position(mloc).title(title).icon(icon));
+					if (self)
+					{
+						mMap.moveCamera(CameraUpdateFactory.newLatLng(mloc));
+						mMap.animateCamera(CameraUpdateFactory.zoomTo(15f), 2000, null);
+					}
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-			debug.setText(theString + "\n" + objs.toString());
 		}
 	}
 

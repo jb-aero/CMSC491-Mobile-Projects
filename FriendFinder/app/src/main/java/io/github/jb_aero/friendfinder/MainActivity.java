@@ -12,32 +12,34 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
 	LocationManager locationManager;
 	EditText username, password;
-	Button php, map, login, register;
+	Button login, register;
 	Handler handler;
+	LoginStringRunnable runnable;
 	Location lastLoc;
+	String[] input;
+	InvokeWebservice service;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		php = (Button) findViewById(R.id.phpbutton);
-		map = (Button) findViewById(R.id.mapbutton);
+		input = new String[2];
 		login = (Button) findViewById(R.id.logButton);
 		register = (Button) findViewById(R.id.toRegButt);
 		username = (EditText) findViewById(R.id.logUser);
 		password = (EditText) findViewById(R.id.logPass);
 		handler = new Handler();
+		runnable = new LoginStringRunnable();
 
 		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-		php.setOnClickListener(this);
-		map.setOnClickListener(this);
 		login.setOnClickListener(this);
 		register.setOnClickListener(this);
 	}
@@ -59,21 +61,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		Intent intent;
 		switch (v.getId())
 		{
-			case R.id.phpbutton:
-				intent = new Intent(this, LoginActivity.class);
-				startActivity(intent);
-				break;
-			case R.id.mapbutton:
-				intent = new Intent(this, MapsActivity.class);
-				startActivity(intent);
-				break;
 			case R.id.logButton:
+				service = new InvokeWebservice("Login", handler, runnable);
+				input[0] = "?username=" + username.getText().toString();
+				input[1] = "&password=" + FFUtility.md5(password.getText().toString());
+				service.execute(input);
 				break;
 			case R.id.toRegButt:
 				intent = new Intent(this, RegisterActivity.class);
 				intent.putExtra("location", lastLoc);
 				startActivity(intent);
 				break;
+		}
+	}
+
+	private class LoginStringRunnable extends StringRunnable {
+
+		@Override
+		public void run() {
+
+			//Toast.makeText(MainActivity.this, theString.substring(0,8), Toast.LENGTH_SHORT).show();
+			if ("SUCCESS".equals(theString.substring(0, 7))) {
+				Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+				intent.putExtra("username", username.getText().toString());
+				intent.putExtra("id", theString.substring(8));
+				startActivity(intent);
+			} else if ("INVALIDLOGIN".equals(theString)) {
+				Toast.makeText(MainActivity.this, "The username and password combination is not valid.", Toast.LENGTH_LONG).show();
+			} else {
+				Toast.makeText(MainActivity.this, "An error has occured: " + theString, Toast.LENGTH_LONG).show();
+			}
 		}
 	}
 }
