@@ -19,7 +19,7 @@ $password = $_REQUEST["password"];
 $latitude = $_REQUEST["latitude"];
 $longitude = $_REQUEST["longitude"];
 
-$table = "snacking";
+$table = "tracking";
 
 $mysqli = new mysqli("localhost", "root", "", "friendfinder");
 
