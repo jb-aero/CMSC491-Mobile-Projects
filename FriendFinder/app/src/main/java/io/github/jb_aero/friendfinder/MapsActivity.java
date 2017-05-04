@@ -35,6 +35,7 @@ public class MapsActivity extends FragmentActivity
 	Button spoof;
 	Handler handler;
 	SupportMapFragment mapFragment;
+	MapsStringRunnable mapRunnable;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +51,7 @@ public class MapsActivity extends FragmentActivity
 		spoof = (Button) findViewById(R.id.spoof);
 		spoof.setOnClickListener(this);
 		handler = new Handler();
+		mapRunnable = new MapsStringRunnable();
 
 		// Obtain the SupportMapFragment and get notified when the map is ready to be used.
 		mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -103,7 +105,7 @@ public class MapsActivity extends FragmentActivity
 		try {
 			if (FFUtility.isBetterAndUpdate(location)) {
 
-				updater = new InvokeWebservice("uploaddata", handler, new MapsStringRunnable());
+				updater = new InvokeWebservice("UpdateLocation", handler, mapRunnable);
 				input[1] = "&latitude=" + location.getLatitude();
 				input[2] = "&longitude=" + location.getLongitude();
 				updater.execute(input);

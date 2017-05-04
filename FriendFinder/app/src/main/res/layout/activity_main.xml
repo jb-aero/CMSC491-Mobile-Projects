@@ -11,25 +11,70 @@
         android:text="Test php"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="101dp"
-        android:id="@+id/phpbutton"/>
+        android:id="@+id/phpbutton"
+        android:layout_above="@+id/mapbutton"
+        android:layout_alignLeft="@+id/mapbutton"
+        android:layout_alignStart="@+id/mapbutton"/>
 
     <Button
         android:text="Test map"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/mapbutton"/>
+        android:id="@+id/mapbutton"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
 
     <TextView
-        android:text="TextView"
+        android:id="@+id/logTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"
-        android:id="@+id/mainDebug"/>
+        android:text="Login"
+        android:textAlignment="center"
+        android:textSize="36sp"/>
+
+    <EditText
+        android:id="@+id/logUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/logTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="57dp"
+        android:ems="10"
+        android:hint="Username"
+        android:inputType="textPersonName"
+        />
+
+    <EditText
+        android:id="@+id/logPass"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/logUser"
+        android:layout_alignStart="@+id/logUser"
+        android:layout_below="@+id/logUser"
+        android:layout_marginTop="20dp"
+        android:ems="10"
+        android:hint="Password"
+        android:inputType="textPassword"/>
+
+    <Button
+        android:id="@+id/logButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="53dp"
+        android:text="Find my friends!"
+        android:layout_below="@+id/logPass"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:id="@+id/toRegButt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="19dp"
+        android:text="Create an account"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"/>
 </RelativeLayout>

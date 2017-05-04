@@ -2,6 +2,9 @@ package io.github.jb_aero.friendfinder;
 
 import android.location.Location;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public class FFUtility {
 
 	public static final int TWO_MINUTES = 1000 * 60 * 2;
@@ -79,5 +82,31 @@ public class FFUtility {
 			return provider2 == null;
 		}
 		return provider1.equals(provider2);
+	}
+
+	// Source: http://www.kospol.gr/204/create-md5-hashes-in-android/
+	public static final String md5(final String s) {
+		final String MD5 = "MD5";
+		try {
+			// Create MD5 Hash
+			MessageDigest digest = java.security.MessageDigest
+					.getInstance(MD5);
+			digest.update(s.getBytes());
+			byte messageDigest[] = digest.digest();
+
+			// Create Hex String
+			StringBuilder hexString = new StringBuilder();
+			for (byte aMessageDigest : messageDigest) {
+				String h = Integer.toHexString(0xFF & aMessageDigest);
+				while (h.length() < 2)
+					h = "0" + h;
+				hexString.append(h);
+			}
+			return hexString.toString();
+
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return "";
 	}
 }

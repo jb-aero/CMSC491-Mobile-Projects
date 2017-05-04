@@ -58,8 +58,8 @@ public class InvokeWebservice extends AsyncTask<String,Integer,String> {
 		{
 			url = new URL(requestURL);
 			HttpURLConnection myconnection =  (HttpURLConnection) url.openConnection();
-			myconnection.setReadTimeout(15000);
-			myconnection.setConnectTimeout(15000);
+			myconnection.setReadTimeout(10000);
+			myconnection.setConnectTimeout(10000);
 			myconnection.setRequestMethod("GET");
 			myconnection.setDoInput(true);
 			myconnection.setDoOutput(true);
