@@ -14,10 +14,13 @@ The latitude and longitude are stored, and then data from the table is sent back
 the requester as a JSON string.
 */
 
+include "DistanceCheck.php";
+
 $latitude = $_REQUEST["latitude"];
 $longitude = $_REQUEST["longitude"];
 $id = $_REQUEST["id"];
 $username = $_REQUEST["username"];
+$distance = $_REQUEST["distance"];
 
 $table = "tracking";
 
@@ -58,12 +61,23 @@ if(!$result)
 
 $jobs = array();
 
+$query = "SELECT * FROM $table WHERE username='$username'";
+$self = $mysqli->query($query)->fetch_assoc();
+
 $query = "SELECT * FROM $table ORDER BY timestamp DESC";
 $result = $mysqli->query($query);
 
-while($row = $result->fetch_assoc()) {
-	$job = array($row['username'],$row['timestamp'],$row['latitude'],$row['longitude']);
-	$jobs[] = json_encode($job);
+while($row = $result->fetch_assoc())
+{
+	if ($row['username'] != $username)
+	{
+		$cdist = getDistance($self['latitude'], $self['longitude'], $row['latitude'], $row['longitude']);
+		if ($cdist < $distance)
+		{
+			$job = array($row['username'],$row['timestamp'],$row['latitude'],$row['longitude'],$cdist);
+			$jobs[] = json_encode($job);
+		}
+	}
 }
 print(json_encode($jobs));
 
