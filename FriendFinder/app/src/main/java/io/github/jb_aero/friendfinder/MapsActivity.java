@@ -11,6 +11,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -30,11 +31,13 @@ public class MapsActivity extends FragmentActivity
 
 	private GoogleMap mMap;
 	LocationManager locationManager;
+	Location lastLoc;
 	boolean ready;
 	String[] input;
 	InvokeWebservice updater;
 	TextView debug;
-	Button spoof;
+	EditText distance;
+	Button spoof, center;
 	Handler handler;
 	SupportMapFragment mapFragment;
 	MapsStringRunnable mapRunnable;
@@ -46,12 +49,15 @@ public class MapsActivity extends FragmentActivity
 
 		ready = false;
 		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-		input = new String[4];
+		input = new String[5];
 		input[0] = "?id=" + getIntent().getStringExtra("id");
 		input[3] = "&username=" + getIntent().getStringExtra("username");
-		debug = (TextView) findViewById(R.id.debugtext);
+		distance = (EditText) findViewById(R.id.distance);
+		debug = (TextView) findViewById(R.id.debug);
 		spoof = (Button) findViewById(R.id.spoof);
 		spoof.setOnClickListener(this);
+		center = (Button) findViewById(R.id.centerButton);
+		center.setOnClickListener(this);
 		handler = new Handler();
 		mapRunnable = new MapsStringRunnable();
 
@@ -69,6 +75,7 @@ public class MapsActivity extends FragmentActivity
 		}
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+		lastLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 		mapFragment.getMapAsync(this);
 	}
 
@@ -90,6 +97,10 @@ public class MapsActivity extends FragmentActivity
 			case R.id.spoof:
 				onLocationChanged(LocationSpoof.spoof());
 				break;
+			case R.id.centerButton:
+				mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lastLoc.getLatitude(), lastLoc.getLongitude())));
+				mMap.animateCamera(CameraUpdateFactory.zoomTo(15f), 2000, null);
+				break;
 		}
 	}
 
@@ -98,18 +109,30 @@ public class MapsActivity extends FragmentActivity
 		mMap = googleMap;
 		mMap.setBuildingsEnabled(true);
 		mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+		mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lastLoc.getLatitude(), lastLoc.getLongitude())));
+		mMap.animateCamera(CameraUpdateFactory.zoomTo(15f), 2000, null);
 		ready = true;
 	}
 
 	@Override
 	public void onLocationChanged(Location location) {
 
+		lastLoc = location;
 		try {
 			if (FFUtility.isBetterAndUpdate(location)) {
+
+				double dist;
+
+				try {
+					dist = Math.abs(Double.valueOf(distance.getText().toString()));
+				} catch (NumberFormatException e) {
+					dist = 1;
+				}
 
 				updater = new InvokeWebservice("UpdateLocation", handler, mapRunnable);
 				input[1] = "&latitude=" + location.getLatitude();
 				input[2] = "&longitude=" + location.getLongitude();
+				input[4] = "&distance=" + dist;
 				updater.execute(input);
 			}
 		} catch (Exception e) {
@@ -121,24 +144,23 @@ public class MapsActivity extends FragmentActivity
 
 		@Override
 		public void run() {
+			//debug.setText(theString);
 			if (!ready)
 				return;
 			mMap.clear();
+			BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
+			String title = "My Location";
+			LatLng mloc = new LatLng(lastLoc.getLatitude(), lastLoc.getLongitude());
+			mMap.addMarker(new MarkerOptions().position(mloc).title(title).icon(icon));
 			try {
 				JSONArray json = new JSONArray(theString);
 				for (int i = 0; i < json.length(); i++)
 				{
 					JSONArray item = new JSONArray(json.getString(i));
-					boolean self = getIntent().getStringExtra("username").equals(item.getString(0));
-					BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(self ? BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_AZURE);
-					String title = item.getString(0) + " @ " + item.getString(1);
-					LatLng mloc = new LatLng(item.getDouble(2), item.getDouble(3));
+					mloc = new LatLng(item.getDouble(2), item.getDouble(3));
+					title = item.getString(0) + " @ " + item.getString(1) + "\n(" + item.getString(4) + " km)";
+					icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE);
 					mMap.addMarker(new MarkerOptions().position(mloc).title(title).icon(icon));
-					if (self)
-					{
-						mMap.moveCamera(CameraUpdateFactory.newLatLng(mloc));
-						mMap.animateCamera(CameraUpdateFactory.zoomTo(15f), 2000, null);
-					}
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();

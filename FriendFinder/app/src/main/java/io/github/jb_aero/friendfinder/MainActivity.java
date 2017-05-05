@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		@Override
 		public void run() {
 
-			//Toast.makeText(MainActivity.this, theString.substring(0,8), Toast.LENGTH_SHORT).show();
+			//Toast.makeText(MainActivity.this, theString, Toast.LENGTH_SHORT).show();
 			if ("SUCCESS".equals(theString.substring(0, 7))) {
 				Intent intent = new Intent(MainActivity.this, MapsActivity.class);
 				intent.putExtra("username", username.getText().toString());

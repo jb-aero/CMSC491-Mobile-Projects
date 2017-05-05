@@ -11,31 +11,53 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="io.github.jb_aero.friendfinder.MapsActivity">
 
-    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:id="@+id/map"
-              android:name="com.google.android.gms.maps.SupportMapFragment"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout_below="@+id/debugtext"
-              android:layout_alignParentLeft="true"
-              android:layout_alignParentStart="true"
-              android:layout_marginTop="10dp"/>
-
-    <TextView
-        android:id="@+id/debugtext"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:layout_below="@+id/spoof"
-        android:layout_centerHorizontal="true"/>
-
     <Button
         android:text="Random Location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/spoof"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"/>
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        style="@style/Widget.AppCompat.Button.Small"
+        android:textSize="8sp"/>
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/spoof"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+
+    <Button
+        android:text="Re-center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/centerButton"/>
+
+    <EditText
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/distance"
+        android:layout_alignBaseline="@+id/centerButton"
+        android:layout_alignBottom="@+id/centerButton"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="18sp"
+        android:layout_width="100dp"
+        android:hint="View km"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/centerButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:id="@+id/debug"/>
 
 </RelativeLayout>
