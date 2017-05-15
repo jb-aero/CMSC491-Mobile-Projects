@@ -3,6 +3,7 @@ package io.github.jb_aero.friendfinder;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -10,8 +11,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
 
+	FirebaseAuth auth;
+	DatabaseReference data;
 	EditText username, password;
 	Button register;
 	Handler handler;
@@ -29,6 +42,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 		input = new String[4];
 		handler = new Handler();
 		runnable = new RegisterStringRunnable();
+
+		auth = FirebaseAuth.getInstance();
+		data = FirebaseDatabase.getInstance().getReference();
+
 		register = (Button) findViewById(R.id.regButton);
 		username = (EditText) findViewById(R.id.regUser);
 		password = (EditText) findViewById(R.id.regPass);
@@ -43,6 +60,20 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 					Toast.makeText(this, "Please use a password of 6 characters or longer.", Toast.LENGTH_LONG).show();
 					return;
 				}
+
+				auth.createUserWithEmailAndPassword(username.getText().toString(),
+						FFUtility.md5(password.getText().toString()))
+						.addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+							@Override
+							public void onComplete(@NonNull Task<AuthResult> task) {
+								if (task.isSuccessful()) {
+									FFUtility.signIn(RegisterActivity.this, email);
+								} else {
+									Toast.makeText(RegisterActivity.this, task.getResult().toString(), Toast.LENGTH_SHORT).show();
+								}
+							}
+						});
+
 				service = new InvokeWebservice("Register", handler, runnable);
 				input[0] = "?username=" + username.getText().toString();
 				// This will be insecure because we aren't using an encrypted connection

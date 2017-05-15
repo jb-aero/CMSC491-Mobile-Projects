@@ -1,6 +1,16 @@
 package io.github.jb_aero.friendfinder;
 
+import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
+import android.support.annotation.NonNull;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -108,5 +118,25 @@ public class FFUtility {
 			e.printStackTrace();
 		}
 		return "";
+	}
+
+	public  static void signIn(Context context, EditText email, EditText password, EditText name) {
+		signIn(context, email.getText().toString(), password.getText().toString(), name.getText().toString());
+	}
+
+	public static void signIn(final Context context, final String email, String password, final String name) {
+		FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+			@Override
+			public void onComplete(@NonNull Task<AuthResult> task) {
+				if (task.isSuccessful()) {
+					//User user = new User(email, name);
+					//mydb.child(User.emailToDB(email)).setValue(user);
+					Intent intent = new Intent(context, MapsActivity.class);
+					context.startActivity(intent);
+				} else {
+					Toast.makeText(context, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+				}
+			}
+		});
 	}
 }
